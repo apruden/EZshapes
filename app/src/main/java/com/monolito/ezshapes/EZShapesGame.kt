@@ -32,6 +32,7 @@ class EZShapesGame : ApplicationAdapter() {
     var W = 0
     var H = 0
     internal var L = 0
+    val shadow = Color(0x00000077.toInt())
 
     override fun create() {
         gestureDetector = CustomGestureDetector()
@@ -118,6 +119,18 @@ class EZShapesGame : ApplicationAdapter() {
             shape.render(shapeRenderer)
             shapeRenderer!!.end()
 
+            //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT or GL20.GL_DEPTH_BUFFER_BIT)
+            Gdx.gl.glEnable(GL20.GL_BLEND)
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+            val shadowRenderer = shapeRenderers.get(shape)
+            shadowRenderer!!.color = shadow
+            shadowRenderer!!.identity()
+            shadowRenderer!!.translate(1f * shape.position.x, 1f * shape.position.y, 0f)
+            shadowRenderer!!.begin(ShapeRenderer.ShapeType.Filled)
+            shape.render(shadowRenderer)
+            shadowRenderer!!.end()
+            Gdx.gl.glDisable(GL20.GL_BLEND)
+
             if (isNear(1f * shape.position.x, 1f * shape.position.y, currx, curry) &&
                     shape.shapeType == targetShape.shapeType && !expFlag) {
                 dragging = false
@@ -140,18 +153,11 @@ class EZShapesGame : ApplicationAdapter() {
         }
 
         if (!expFlag) {
-            targetRenderer.color = Color.WHITE
-            targetRenderer.begin(ShapeRenderer.ShapeType.Line)
-            targetShape.render(targetRenderer)
-            targetRenderer.end()
-
             targetRenderer.color = targetShape.color
             targetRenderer.identity()
             targetRenderer.translate(currx, curry, 0f)
             targetRenderer.begin(ShapeRenderer.ShapeType.Filled)
             targetShape.render(targetRenderer)
-            targetRenderer.color = Color.WHITE
-            targetRenderer.circle(0f, 0f, L/5f)
             targetRenderer.end()
         }
 
